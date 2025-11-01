@@ -15,10 +15,11 @@ datasource db {
 }
 
 model User {
-  id              String  @id @default(uuid())
-  email           String  @unique @db.VarChar(255)
-  hashed_password Bytes
-  name            String? @db.VarChar(255)
+  id             String  @id @default(uuid())
+  email          String  @unique @db.VarChar(255)
+  hashedPassword Bytes
+  name           String? @db.VarChar(255)
+  Task           Task[]
 }
 
 model Task {
@@ -26,8 +27,10 @@ model Task {
   title       String     @db.VarChar(255)
   description String?    @db.VarChar(255)
   status      TaskStatus @default(NOT_STARTED)
-  created_at  DateTime
-  updated_at  DateTime
+  createdAt   DateTime
+  updatedAt   DateTime
+  creatorId   String
+  User        User       @relation(fields: [creatorId], references: [id])
 }
 
 enum TaskStatus {
