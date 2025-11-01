@@ -1,11 +1,17 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import testRoutes from "./routes/test/test.js";
 
-const app = new Hono();
+const app = new Hono().basePath("/api");
 
 app.get("/", (c) => {
-  return c.text("Hello Hono!");
+  return c.json({
+    ok: true,
+    message: "Hello Hono!",
+  });
 });
+
+app.route("/test", testRoutes);
 
 serve(
   {
