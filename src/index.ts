@@ -1,10 +1,43 @@
+import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import type { Bindings } from "./helpers";
+import { prettyJSON } from "hono/pretty-json";
+import testRoutes from "./routes/test.js";
 
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono().basePath("/api");
+app.use(prettyJSON());
+
+app.notFound((c) =>
+  c.json(
+    {
+      status: "error",
+      message: "Not found",
+    },
+    404,
+  ),
+);
+
+app.onError((err, c) =>
+  c.json({
+    status: "error",
+    message: err.message,
+  }),
+);
 
 app.get("/", (c) => {
-  return c.text("Hello Hono!");
+  return c.json({
+    status: "success",
+    data: "Hello Hono!",
+  });
 });
 
-export default app;
+app.route("/test", testRoutes);
+
+serve(
+  {
+    fetch: app.fetch,
+    port: 3000,
+  },
+  (info) => {
+    console.log(`Server is running on http://localhost:${info.port}`);
+  },
+);

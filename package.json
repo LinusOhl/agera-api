@@ -2,11 +2,12 @@
   "name": "agera-api",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.6",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "dotenv": "^17.2.3",
@@ -15,9 +16,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.7",
+    "@types/node": "^20.11.17",
     "@types/pg": "^8.15.6",
     "prisma": "^7.0.0",
-    "typescript": "^5.9.3",
-    "wrangler": "^4.4.0"
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
   }
 }
