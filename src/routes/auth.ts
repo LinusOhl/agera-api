@@ -3,7 +3,7 @@ import { createUser } from "../services/user.service.js";
 
 const app = new Hono();
 
-app.get("/signup", async (c) => {
+app.post("/signup", async (c) => {
   const body = await c.req.json();
 
   const result = await createUser(body);
