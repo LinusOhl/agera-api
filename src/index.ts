@@ -1,9 +1,10 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { prettyJSON } from "hono/pretty-json";
-import testRoutes from "./routes/test.js";
+import authRoutes from "./routes/auth.js";
 
 const app = new Hono().basePath("/api");
+
 app.use(prettyJSON());
 
 app.notFound((c) =>
@@ -23,14 +24,7 @@ app.onError((err, c) =>
   }),
 );
 
-app.get("/", (c) => {
-  return c.json({
-    status: "success",
-    data: "Hello Hono!",
-  });
-});
-
-app.route("/test", testRoutes);
+app.route("/auth", authRoutes);
 
 serve(
   {
