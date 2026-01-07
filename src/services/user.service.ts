@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHash, hash, randomBytes } from "node:crypto";
 import { TextEncoder } from "node:util";
 import argon2 from "argon2";
 import * as jose from "jose";
@@ -108,10 +108,9 @@ export const loginUser = async (data: LoginCredentials) => {
   }
 
   const refreshToken = randomBytes(64).toString("base64");
-  const hashedRefreshToken = await argon2.hash(refreshToken, {
-    type: argon2.argon2id,
-    secret: Buffer.from(refreshTokenSecret),
-  });
+  const hashedRefreshToken = createHash("sha256")
+    .update(refreshToken)
+    .digest("base64");
 
   // Thirty days from now
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
