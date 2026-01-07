@@ -1,4 +1,4 @@
-import { createHash, hash, randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { TextEncoder } from "node:util";
 import argon2 from "argon2";
 import * as jose from "jose";
