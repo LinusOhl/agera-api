@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import argon2 from "argon2";
 import * as jose from "jose";
-import { emailRegex, getUserIdFromToken } from "../helpers.js";
+import { emailRegex } from "../helpers.js";
 import { prisma } from "../lib/prisma.js";
 import type { LoginCredentials, UserCreateData } from "../types/auth.types.js";
 
@@ -201,23 +201,7 @@ export const refreshAccessToken = async (refreshToken: string | undefined) => {
   };
 };
 
-export const logoutUser = async (authHeader: string | undefined) => {
-  if (!authHeader) {
-    throw new Error("Missing authorization header.");
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    throw new Error("Missing JWT token.");
-  }
-
-  const userId = await getUserIdFromToken(token);
-
-  if (!userId) {
-    throw new Error("Unauthorized.");
-  }
-
+export const logoutUser = async (userId: string) => {
   const refreshToken = await prisma.refreshToken.findFirst({
     where: {
       userId: userId,
