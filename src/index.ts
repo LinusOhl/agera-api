@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { prettyJSON } from "hono/pretty-json";
 import authRoutes from "./routes/auth.js";
+import tasksRoutes from "./routes/tasks.js";
 
 const app = new Hono().basePath("/api");
 
@@ -25,6 +26,7 @@ app.onError((err, c) =>
 );
 
 app.route("/auth", authRoutes);
+app.route("/tasks", tasksRoutes);
 
 serve(
   {
