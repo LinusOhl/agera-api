@@ -28,3 +28,18 @@ export const getTasksByUserId = async (userId: string) => {
 
   return tasks;
 };
+
+export const getTaskById = async (userId: string, taskId: string) => {
+  const task = await prisma.task.findUnique({
+    where: {
+      id: taskId,
+      userId,
+    },
+  });
+
+  if (!task) {
+    throw new Error("Task not found.");
+  }
+
+  return task;
+};
