@@ -200,3 +200,46 @@ export const refreshAccessToken = async (refreshToken: string | undefined) => {
     },
   };
 };
+
+export const logoutUser = async (authHeader: string | undefined) => {
+  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+
+  if (!accessTokenSecret) {
+    throw new Error("Missing 'ACCESS_TOKEN_SECRET' environment variable.");
+  }
+
+  if (!authHeader) {
+    throw new Error("Missing authorization header.");
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    throw new Error("Missing JWT token.");
+  }
+
+  const secret = new TextEncoder().encode(accessTokenSecret);
+  const { payload } = await jose.jwtVerify(token, secret);
+
+  const userId = payload.sub;
+
+  if (!userId) {
+    throw new Error("Unauthorized.");
+  }
+
+  const refreshToken = await prisma.refreshToken.findFirst({
+    where: {
+      userId: userId,
+    },
+  });
+
+  if (!refreshToken) {
+    throw new Error("Unauthorized.");
+  }
+
+  return await prisma.refreshToken.delete({
+    where: {
+      id: refreshToken.id,
+    },
+  });
+};
