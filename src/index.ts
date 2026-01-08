@@ -4,6 +4,10 @@ import { prettyJSON } from "hono/pretty-json";
 import authRoutes from "./routes/auth.js";
 import tasksRoutes from "./routes/tasks.js";
 
+export type Variables = {
+  userId: string;
+};
+
 const app = new Hono().basePath("/api");
 
 app.use(prettyJSON());

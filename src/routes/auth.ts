@@ -1,5 +1,7 @@
 import { Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import type { Variables } from "../index.js";
+import { isUser } from "../middlewares/isUser.js";
 import {
   createUser,
   loginUser,
@@ -7,7 +9,7 @@ import {
   refreshAccessToken,
 } from "../services/auth.service.js";
 
-const app = new Hono();
+const app = new Hono<{ Variables: Variables }>();
 
 app.post("/signup", async (c) => {
   const body = await c.req.json();
@@ -52,10 +54,12 @@ app.get("/refresh", async (c) => {
   });
 });
 
-app.get("/logout", async (c) => {
-  const authHeader = c.req.header("Authorization");
+app.use("/logout", isUser);
 
-  const result = await logoutUser(authHeader);
+app.get("/logout", async (c) => {
+  const userId = c.get("userId");
+
+  const result = await logoutUser(userId);
 
   deleteCookie(c, "refresh_token");
 
