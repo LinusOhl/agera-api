@@ -9,12 +9,6 @@ export const createTask = async (
   authHeader: string | undefined,
   data: TaskCreateInput,
 ): Promise<TaskModel> => {
-  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-
-  if (!accessTokenSecret) {
-    throw new Error("Missing 'ACCESS_TOKEN_SECRET' environment variable.");
-  }
-
   if (!authHeader) {
     throw new Error("Missing authorization header.");
   }
