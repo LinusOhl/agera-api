@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import argon2 from "argon2";
 import * as jose from "jose";
-import { emailRegex } from "../helpers.js";
+import { emailRegex, getUserIdFromToken } from "../helpers.js";
 import { prisma } from "../lib/prisma.js";
 import type { LoginCredentials, UserCreateData } from "../types/auth.types.js";
 
@@ -202,12 +202,6 @@ export const refreshAccessToken = async (refreshToken: string | undefined) => {
 };
 
 export const logoutUser = async (authHeader: string | undefined) => {
-  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-
-  if (!accessTokenSecret) {
-    throw new Error("Missing 'ACCESS_TOKEN_SECRET' environment variable.");
-  }
-
   if (!authHeader) {
     throw new Error("Missing authorization header.");
   }
@@ -218,10 +212,7 @@ export const logoutUser = async (authHeader: string | undefined) => {
     throw new Error("Missing JWT token.");
   }
 
-  const secret = new TextEncoder().encode(accessTokenSecret);
-  const { payload } = await jose.jwtVerify(token, secret);
-
-  const userId = payload.sub;
+  const userId = await getUserIdFromToken(token);
 
   if (!userId) {
     throw new Error("Unauthorized.");
