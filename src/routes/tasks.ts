@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { Variables } from "../index.js";
 import { isUser } from "../middlewares/isUser.js";
-import { createTask, getTasks } from "../services/task.service.js";
+import { createTask, getTasksByUserId } from "../services/task.service.js";
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -22,7 +22,7 @@ app.post("/", async (c) => {
 app.get("/", async (c) => {
   const userId = c.get("userId");
 
-  const result = await getTasks(userId);
+  const result = await getTasksByUserId(userId);
 
   return c.json({
     status: "success",
