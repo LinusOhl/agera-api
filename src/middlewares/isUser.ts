@@ -13,5 +13,5 @@ export const isUser = createMiddleware(async (c, next) => {
     throw new Error("Missing JWT token.");
   }
 
-  next();
+  await next();
 });
