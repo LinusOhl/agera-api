@@ -9,8 +9,6 @@ import {
   refreshAccessToken,
 } from "../services/auth.service.js";
 
-// TODO: add status codes
-
 const app = new Hono<{ Variables: Variables }>();
 
 app.post("/signup", async (c) => {
@@ -18,10 +16,13 @@ app.post("/signup", async (c) => {
 
   const result = await createUser(body);
 
-  return c.json({
-    status: "success",
-    data: result,
-  });
+  return c.json(
+    {
+      status: "success",
+      data: result,
+    },
+    201,
+  );
 });
 
 app.post("/login", async (c) => {
@@ -34,10 +35,13 @@ app.post("/login", async (c) => {
     expires: result.refreshToken.expiresAt,
   });
 
-  return c.json({
-    status: "success",
-    data: result.jwt,
-  });
+  return c.json(
+    {
+      status: "success",
+      data: result.jwt,
+    },
+    200,
+  );
 });
 
 app.get("/refresh", async (c) => {
@@ -50,10 +54,13 @@ app.get("/refresh", async (c) => {
     expires: result.refreshToken.expiresAt,
   });
 
-  return c.json({
-    status: "success",
-    data: result.jwt,
-  });
+  return c.json(
+    {
+      status: "success",
+      data: result.jwt,
+    },
+    200,
+  );
 });
 
 app.use("/logout", isUser);
@@ -65,10 +72,13 @@ app.get("/logout", async (c) => {
 
   deleteCookie(c, "refresh_token");
 
-  return c.json({
-    status: "success",
-    data: result,
-  });
+  return c.json(
+    {
+      status: "success",
+      data: result,
+    },
+    200,
+  );
 });
 
 export default app;

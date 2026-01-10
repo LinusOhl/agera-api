@@ -8,8 +8,6 @@ import {
   updateTaskById,
 } from "../services/task.service.js";
 
-// TODO: add status codes
-
 const app = new Hono<{ Variables: Variables }>();
 
 app.use(isUser);
@@ -20,10 +18,13 @@ app.post("/", async (c) => {
 
   const result = await createTask(userId, body);
 
-  return c.json({
-    status: "success",
-    data: result,
-  });
+  return c.json(
+    {
+      status: "success",
+      data: result,
+    },
+    201,
+  );
 });
 
 app.get("/", async (c) => {
@@ -31,10 +32,13 @@ app.get("/", async (c) => {
 
   const result = await getTasksByUserId(userId);
 
-  return c.json({
-    status: "success",
-    data: result,
-  });
+  return c.json(
+    {
+      status: "success",
+      data: result,
+    },
+    200,
+  );
 });
 
 app.get("/:id", async (c) => {
@@ -43,10 +47,13 @@ app.get("/:id", async (c) => {
 
   const result = await getTaskById(userId, taskId);
 
-  return c.json({
-    status: "success",
-    data: result,
-  });
+  return c.json(
+    {
+      status: "success",
+      data: result,
+    },
+    200,
+  );
 });
 
 app.put("/:id", async (c) => {
@@ -56,10 +63,13 @@ app.put("/:id", async (c) => {
 
   const result = await updateTaskById(userId, taskId, body);
 
-  return c.json({
-    status: "success",
-    data: result,
-  });
+  return c.json(
+    {
+      status: "success",
+      data: result,
+    },
+    200,
+  );
 });
 
 export default app;
