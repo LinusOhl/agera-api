@@ -1,4 +1,5 @@
 import { createMiddleware } from "hono/factory";
+import { HTTPException } from "hono/http-exception";
 import * as jose from "jose";
 
 export const isUser = createMiddleware(async (c, next) => {
@@ -21,15 +22,27 @@ export const isUser = createMiddleware(async (c, next) => {
   }
 
   const secret = new TextEncoder().encode(accessTokenSecret);
-  const { payload } = await jose.jwtVerify(token, secret);
 
-  const userId = payload.sub;
+  try {
+    const { payload } = await jose.jwtVerify(token, secret);
 
-  if (!userId) {
-    throw new Error("Unauthorized.");
+    const userId = payload.sub;
+
+    if (!userId) {
+      throw new Error("Unauthorized.");
+    }
+
+    c.set("userId", userId);
+
+    await next();
+  } catch (error) {
+    if (error instanceof jose.errors.JWTExpired) {
+      throw new HTTPException(401, { message: "Expired JWT token." });
+    }
+
+    throw new HTTPException(401, {
+      message: "Something went wrong.",
+      cause: error,
+    });
   }
-
-  c.set("userId", userId);
-
-  await next();
 });
