@@ -5,6 +5,8 @@ import { emailRegex } from "../helpers.js";
 import { prisma } from "../lib/prisma.js";
 import type { LoginCredentials, UserCreateData } from "../types/auth.types.js";
 
+// TODO: when throwing error, try to incorporate status codes
+
 export const createUser = async (data: UserCreateData) => {
   const passwordPepper = process.env.PASSWORD_PEPPER;
 
