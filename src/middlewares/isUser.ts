@@ -6,19 +6,21 @@ export const isUser = createMiddleware(async (c, next) => {
   const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 
   if (!accessTokenSecret) {
-    throw new Error("Missing 'ACCESS_TOKEN_SECRET' environment variable.");
+    throw new HTTPException(400, {
+      message: "Missing 'ACCESS_TOKEN_SECRET' environment variable.",
+    });
   }
 
   const authHeader = c.req.header("Authorization");
 
   if (!authHeader) {
-    throw new Error("Missing authorization header.");
+    throw new HTTPException(401, { message: "Missing authorization header." });
   }
 
   const token = authHeader.split(" ")[1];
 
   if (!token) {
-    throw new Error("Missing JWT token.");
+    throw new HTTPException(401, { message: "Missing JWT token." });
   }
 
   const secret = new TextEncoder().encode(accessTokenSecret);
@@ -29,7 +31,7 @@ export const isUser = createMiddleware(async (c, next) => {
     const userId = payload.sub;
 
     if (!userId) {
-      throw new Error("Unauthorized.");
+      throw new HTTPException(400, { message: "Missing payload sub." });
     }
 
     c.set("userId", userId);
