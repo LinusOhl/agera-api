@@ -1,3 +1,4 @@
+import { HTTPException } from "hono/http-exception";
 import type {
   TaskCreateInput,
   TaskModel,
@@ -12,7 +13,7 @@ export const createTask = async (
   const task = await prisma.task.create({
     data: {
       title: data.title,
-      description: data.description ?? "",
+      description: data.description,
       userId: userId,
     },
   });
@@ -39,7 +40,7 @@ export const getTaskById = async (userId: string, taskId: string) => {
   });
 
   if (!task) {
-    throw new Error("Task not found.");
+    throw new HTTPException(404, { message: "Task not found." });
   }
 
   return task;
