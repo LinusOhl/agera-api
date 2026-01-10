@@ -9,6 +9,8 @@ import {
   refreshAccessToken,
 } from "../services/auth.service.js";
 
+// TODO: add status codes
+
 const app = new Hono<{ Variables: Variables }>();
 
 app.post("/signup", async (c) => {
