@@ -5,7 +5,10 @@ import {
   createTask,
   getTaskById,
   getTasksByUserId,
+  updateTaskById,
 } from "../services/task.service.js";
+
+// TODO: add status codes
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -39,6 +42,19 @@ app.get("/:id", async (c) => {
   const taskId = c.req.param("id");
 
   const result = await getTaskById(userId, taskId);
+
+  return c.json({
+    status: "success",
+    data: result,
+  });
+});
+
+app.put("/:id", async (c) => {
+  const userId = c.get("userId");
+  const taskId = c.req.param("id");
+  const body = await c.req.json();
+
+  const result = await updateTaskById(userId, taskId, body);
 
   return c.json({
     status: "success",

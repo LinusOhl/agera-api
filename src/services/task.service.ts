@@ -1,6 +1,7 @@
 import type {
   TaskCreateInput,
   TaskModel,
+  TaskUpdateInput,
 } from "../../generated/prisma/models.js";
 import { prisma } from "../lib/prisma.js";
 
@@ -40,6 +41,29 @@ export const getTaskById = async (userId: string, taskId: string) => {
   if (!task) {
     throw new Error("Task not found.");
   }
+
+  return task;
+};
+
+export const updateTaskById = async (
+  userId: string,
+  taskId: string,
+  data: TaskUpdateInput,
+) => {
+  const now = new Date(Date.now());
+
+  const task = await prisma.task.update({
+    where: {
+      id: taskId,
+      userId,
+    },
+    data: {
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      updatedAt: now,
+    },
+  });
 
   return task;
 };
