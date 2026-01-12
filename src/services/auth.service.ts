@@ -1,11 +1,13 @@
 import { createHash, randomBytes } from "node:crypto";
 import argon2 from "argon2";
+import { HTTPException } from "hono/http-exception";
 import * as jose from "jose";
 import { emailRegex } from "../helpers.js";
 import { prisma } from "../lib/prisma.js";
 import type { LoginCredentials, UserCreateData } from "../types/auth.types.js";
 
 // TODO: when throwing error, try to incorporate status codes
+// TODO: validate data
 
 export const createUser = async (data: UserCreateData) => {
   const passwordPepper = process.env.PASSWORD_PEPPER;
@@ -144,11 +146,13 @@ export const refreshAccessToken = async (refreshToken: string | undefined) => {
   const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 
   if (!accessTokenSecret) {
-    throw new Error("Missing 'ACCESS_TOKEN_SECRET' environment variable.");
+    throw new HTTPException(400, {
+      message: "Missing 'ACCESS_TOKEN_SECRET' environment variable.",
+    });
   }
 
   if (!refreshToken) {
-    throw new Error("Missing refresh token cookie.");
+    throw new HTTPException(400, { message: "Missing refresh token cookie." });
   }
 
   const hashedRefreshToken = createHash("sha256")
@@ -162,7 +166,7 @@ export const refreshAccessToken = async (refreshToken: string | undefined) => {
   });
 
   if (!foundRefreshToken) {
-    throw new Error("Unauthorized.");
+    throw new HTTPException(401, { message: "Unauthorized." });
   }
 
   const newRefreshToken = randomBytes(64).toString("base64");
