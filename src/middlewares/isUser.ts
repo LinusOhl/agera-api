@@ -1,3 +1,4 @@
+import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import * as jose from "jose";
@@ -11,22 +12,16 @@ export const isUser = createMiddleware(async (c, next) => {
     });
   }
 
-  const authHeader = c.req.header("Authorization");
+  const cookie = getCookie(c, "agera_access_token");
 
-  if (!authHeader) {
-    throw new HTTPException(401, { message: "Missing authorization header." });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    throw new HTTPException(401, { message: "Missing JWT token." });
+  if (!cookie) {
+    throw new HTTPException(401, { message: "Unauthorized." });
   }
 
   const secret = new TextEncoder().encode(accessTokenSecret);
 
   try {
-    const { payload } = await jose.jwtVerify(token, secret);
+    const { payload } = await jose.jwtVerify(cookie, secret);
 
     const userId = payload.sub;
 

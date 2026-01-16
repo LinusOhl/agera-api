@@ -14,12 +14,12 @@ const app = new Hono<{ Variables: Variables }>();
 app.post("/signup", async (c) => {
   const body = await c.req.json();
 
-  const result = await createUser(body);
+  await createUser(body);
 
   return c.json(
     {
       status: "success",
-      data: result,
+      data: null,
     },
     201,
   );
@@ -30,34 +30,49 @@ app.post("/login", async (c) => {
 
   const result = await loginUser(body);
 
-  setCookie(c, "refresh_token", result.refreshToken.token, {
+  setCookie(c, "agera_refresh_token", result.refreshToken.token, {
     httpOnly: true,
     expires: result.refreshToken.expiresAt,
+    sameSite: "lax",
+  });
+
+  setCookie(c, "agera_access_token", result.accessToken, {
+    httpOnly: true,
+    sameSite: "lax",
   });
 
   return c.json(
     {
       status: "success",
-      data: result.jwt,
+      data: result.user,
     },
     200,
   );
 });
 
+app.use("/refresh", isUser);
+
 app.get("/refresh", async (c) => {
-  const cookie = getCookie(c, "refresh_token");
+  const refreshTokenCookie = getCookie(c, "agera_refresh_token");
+  const userId = c.get("userId");
 
-  const result = await refreshAccessToken(cookie);
+  const result = await refreshAccessToken(refreshTokenCookie, userId);
 
-  setCookie(c, "refresh_token", result.refreshToken.token, {
+  setCookie(c, "agera_refresh_token", result.refreshToken.token, {
     httpOnly: true,
     expires: result.refreshToken.expiresAt,
+    sameSite: "lax",
+  });
+
+  setCookie(c, "agera_access_token", result.accessToken, {
+    httpOnly: true,
+    sameSite: "lax",
   });
 
   return c.json(
     {
       status: "success",
-      data: result.jwt,
+      data: result.user,
     },
     200,
   );
@@ -68,14 +83,15 @@ app.use("/logout", isUser);
 app.get("/logout", async (c) => {
   const userId = c.get("userId");
 
-  const result = await logoutUser(userId);
+  await logoutUser(userId);
 
-  deleteCookie(c, "refresh_token");
+  deleteCookie(c, "agera_refresh_token");
+  deleteCookie(c, "agera_access_token");
 
   return c.json(
     {
       status: "success",
-      data: result,
+      data: null,
     },
     200,
   );

@@ -134,15 +134,23 @@ export const loginUser = async (data: LoginCredentials) => {
     .sign(secret);
 
   return {
-    jwt,
+    accessToken: jwt,
     refreshToken: {
       token: refreshToken,
       expiresAt,
     },
+    user: {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+    },
   };
 };
 
-export const refreshAccessToken = async (refreshToken: string | undefined) => {
+export const refreshAccessToken = async (
+  refreshToken: string | undefined,
+  userId: string,
+) => {
   const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 
   if (!accessTokenSecret) {
@@ -155,13 +163,19 @@ export const refreshAccessToken = async (refreshToken: string | undefined) => {
     throw new HTTPException(400, { message: "Missing refresh token cookie." });
   }
 
-  const hashedRefreshToken = createHash("sha256")
-    .update(refreshToken)
-    .digest("base64");
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw new HTTPException(401, { message: "Unauthorized." });
+  }
 
   const foundRefreshToken = await prisma.refreshToken.findFirst({
     where: {
-      hashedToken: hashedRefreshToken,
+      userId: userId,
     },
   });
 
@@ -181,12 +195,12 @@ export const refreshAccessToken = async (refreshToken: string | undefined) => {
     data: {
       hashedToken: newHashedRefreshToken,
       expiresAt,
-      userId: foundRefreshToken.userId,
+      userId: userId,
     },
   });
 
   const secret = new TextEncoder().encode(accessTokenSecret);
-  const jwt = await new jose.SignJWT({ sub: foundRefreshToken.userId })
+  const jwt = await new jose.SignJWT({ sub: userId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("10min")
@@ -199,10 +213,15 @@ export const refreshAccessToken = async (refreshToken: string | undefined) => {
   });
 
   return {
-    jwt,
+    accessToken: jwt,
     refreshToken: {
       token: newRefreshToken,
       expiresAt,
+    },
+    user: {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
     },
   };
 };
